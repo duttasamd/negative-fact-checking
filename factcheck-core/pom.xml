@@ -6,12 +6,6 @@
 	<groupId>org.dice-research</groupId>
 	<version>1.0.1</version>
 
-	<parent>
-		<groupId>org.dice-research</groupId>
-		<artifactId>FactCheck</artifactId>
-		<version>1.0.0</version>
-	</parent>
-
 	<properties>
 		<owlapi.version>4.5.19</owlapi.version>
 		<maven.compiler.source>1.8</maven.compiler.source>
@@ -31,11 +25,11 @@
 			<url>https://repo1.maven.org/maven2/</url>
 			<layout>default</layout>
 		</repository>
-<!--		<repository>
+		<!-- <repository>
 			<id>test</id>
 			<name>test</name>
 			<url>https://repo1.maven.org/maven2/com/github/jsonld-java/jsonld-java/0.12.5/</url>
-		</repository>-->
+		</repository> -->
 		<repository>
 			<id>maven2-repository.dev.java.net</id>
 			<name>Java.net Repository for Maven</name>
@@ -158,13 +152,13 @@
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/com.github.jsonld-java/jsonld-java -->
-		<!--<dependency>
+		<!-- <dependency>
 			<groupId>com.github.jsonld-java</groupId>
 			<artifactId>jsonld-java</artifactId>
 			<version>0.12.5</version>
 			<scope>system</scope>
 			<systemPath>${basedir}/lib/jsonld-java-0.12.5.jar</systemPath>
-		</dependency>-->
+		</dependency> -->
 
 		<dependency>
 			<groupId>org.json</groupId>
@@ -406,7 +400,8 @@
 
 		<!-- https://mvnrepository.com/artifact/com.github.jsonld-java/jsonld-java -->
 		<dependency>
-			<groupId>com.github.jsonld-java</groupId>
+			<groupId>com.github.jsonld-java.jsonld-java</groupId>
+			<!-- <groupId>com.github.jsonld-java</groupId> -->
 			<artifactId>jsonld-java</artifactId>
 			<version>0.12.5</version>
 		</dependency>
@@ -447,7 +442,7 @@
 		<dependency>
 			<groupId>org.aksw</groupId>
 			<artifactId>sparql-metrics</artifactId>
-			<version>0.0.1-SNAPSHOT-jena-3.16-full-0.0.3</version>
+			<version>0.0.1-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<groupId>net.sourceforge.owlapi</groupId>
@@ -595,6 +590,4 @@
 		<!--<dependency> <groupId>com.github.AKSW.DL-Learner</groupId> <artifactId>components-core</artifactId> 
 			<version>1.2</version> </dependency> -->
 	</dependencies>
-
-
 </project>

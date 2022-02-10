@@ -13,8 +13,9 @@ public class CoreNLPLocalClient implements CoreNLPClient {
 	// Other for applying Coreference on extracted sentences
 	private StanfordCoreNLP pipelineSentence;
 	private StanfordCoreNLP pipelineCoref;
+	private static CoreNLPLocalClient coreNLPClient = null;
 
-	public CoreNLPLocalClient() {
+	private CoreNLPLocalClient() {
 
 		Properties propSentences = new Properties();
 		propSentences.put("annotators", "tokenize, ssplit");
@@ -30,6 +31,14 @@ public class CoreNLPLocalClient implements CoreNLPClient {
 		propCoreference.put("coref.model", "edu/stanford/nlp/models/coref/statistical/ranking_model.ser.gz");
 		propCoreference.put("annotators", "tokenize, ssplit, pos, lemma, ner, parse, mention, coref");
 		this.pipelineCoref = new StanfordCoreNLP(propCoreference);
+	}
+
+	public static CoreNLPLocalClient getCoreNLPClient() {
+		if(coreNLPClient == null) {
+			coreNLPClient = new CoreNLPLocalClient();
+		}
+
+		return coreNLPClient;
 	}
 
 	@Override

@@ -63,7 +63,7 @@ public class DefactoModel {
         if(Defacto.DEFACTO_CONFIG.getBooleanSetting("corenlp", "USE_SERVER"))
             this.corenlpClient = new CoreNLPServerClient();
         else
-        	this.corenlpClient = new CoreNLPLocalClient();
+        	this.corenlpClient = CoreNLPLocalClient.getCoreNLPClient();
         
     }
     
@@ -159,35 +159,39 @@ public class DefactoModel {
     		// we have found the blank node
 
 			String sss = stmt.getSubject().getURI();
-    		if ( stmt.getSubject().getURI().matches("^.*__[0-9]*$") ) {
+    		// if ( stmt.getSubject().getURI().matches("^.*__[0-9]*$") ) {
     			
-    			if ( stmt.getObject().isResource() ) {
+    		// 	if ( stmt.getObject().isResource() ) {
     				
-        			this.object = new DefactoResource(stmt.getObject().asResource(), model);
-        			this.predicate = stmt.getPredicate();
-        			this.predicateUri = this.predicate.getURI();
+        	// 		this.object = new DefactoResource(stmt.getObject().asResource(), model);
+        	// 		this.predicate = stmt.getPredicate();
+        	// 		this.predicateUri = this.predicate.getURI();
 
-					NodeIterator tmp = model.listObjectsOfProperty(stmt.getSubject(), Constants.DEFACTO_FROM);
-					RDFNode next = tmp.next();
-					Literal lit = next.asLiteral();
-					String lexForm = lit.getLexicalForm();
+			// 		NodeIterator tmp = model.listObjectsOfProperty(stmt.getSubject(), Constants.DEFACTO_FROM);
+			// 		RDFNode next = tmp.next();
+			// 		Literal lit = next.asLiteral();
+			// 		String lexForm = lit.getLexicalForm();
 
-        			String from = model.listObjectsOfProperty(stmt.getSubject(), Constants.DEFACTO_FROM).next().asLiteral().getLexicalForm();
-        			String to = model.listObjectsOfProperty(stmt.getSubject(), Constants.DEFACTO_TO).next().asLiteral().getLexicalForm();
+        	// 		String from = model.listObjectsOfProperty(stmt.getSubject(), Constants.DEFACTO_FROM).next().asLiteral().getLexicalForm();
+        	// 		String to = model.listObjectsOfProperty(stmt.getSubject(), Constants.DEFACTO_TO).next().asLiteral().getLexicalForm();
         			
-        			this.timePeriod = new DefactoTimePeriod(from, to);
+        	// 		this.timePeriod = new DefactoTimePeriod(from, to);
         			
-        			StmtIterator listIter2 = model.listStatements();
-                	while ( listIter2.hasNext() ) {
+        	// 		StmtIterator listIter2 = model.listStatements();
+            //     	while ( listIter2.hasNext() ) {
 
-                		Statement stmt2 = listIter2.next();
-                		if ( stmt2.getObject().isResource() && stmt2.getObject().asResource().getURI().equals(stmt.getSubject().getURI()) ) {
+            //     		Statement stmt2 = listIter2.next();
+            //     		if ( stmt2.getObject().isResource() && stmt2.getObject().asResource().getURI().equals(stmt.getSubject().getURI()) ) {
 
-                			this.subject = new DefactoResource(stmt2.getSubject().asResource(), model);
-                		}
-                	};
-    			}
-    		}
+            //     			this.subject = new DefactoResource(stmt2.getSubject().asResource(), model);
+            //     		}
+            //     	};
+    		// 	}
+    		// }
+			this.object = new DefactoResource(stmt.getObject().asResource(), model);
+			this.predicate = stmt.getPredicate();
+			this.predicateUri = this.predicate.getURI();
+			this.subject = new DefactoResource(stmt.getSubject().asResource(), model);
     	}
 	}
 

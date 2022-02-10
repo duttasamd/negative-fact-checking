@@ -43,7 +43,7 @@ public class QueryGenerator {
      * @param model
      */
     public QueryGenerator(DefactoModel model) {
-        
+        BoaPatternSearcher.init();
         this.model = model;
     }
     
@@ -83,11 +83,11 @@ public class QueryGenerator {
         	if ( !pattern.getNormalized().trim().isEmpty() ) {
         		
         		MetaQuery metaQuery = new MetaQuery(subjectLabel, pattern.getNormalized(), objectLabel, language, null);
-        		System.out.println(metaQuery);
+        		// System.out.println(metaQuery);
         		queryStrings.put(pattern, metaQuery);
         	}
         }
-       
+        // System.out.println(queryStrings);
         return queryStrings;
     }
 }

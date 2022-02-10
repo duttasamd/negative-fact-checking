@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.aksw.defacto.Constants;
+import org.aksw.defacto.util.SparqlUtil;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.NodeIterator;
 import org.apache.jena.rdf.model.RDFNode;
@@ -28,6 +29,9 @@ public class DefactoResource {
 	public Map<String,Set<String>> altLabels = new HashMap<String,Set<String>>();
 	public List<Resource> owlSameAs = new ArrayList<Resource>();
 	private String uri;
+
+	private static final String endpoint = "http://live.dbpedia.org/sparql";
+	private static final String graph = "http://dbpedia.org";
 
 	public DefactoResource(Resource resource, Model model) {
 		
@@ -105,6 +109,14 @@ public class DefactoResource {
 				RDFNode node = listObjectsOfProperty.next();
 				this.altLabels.get(node.asLiteral().getLanguage()).add(node.asLiteral().getLexicalForm());
 			}
+		}
+
+		if(this.labels.isEmpty()) {
+			SparqlUtil sparql = new SparqlUtil(endpoint, graph);
+			String label = sparql.getLabel(this.resource.getURI());
+			String[] labelParts = label.split("@");
+			if(!label.isEmpty())
+				this.labels.put(labelParts[1], labelParts[0]);
 		}
 	}
 

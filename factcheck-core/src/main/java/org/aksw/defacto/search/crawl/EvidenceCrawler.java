@@ -64,7 +64,6 @@ public class EvidenceCrawler {
      * @param patternToQueries
      */
     public EvidenceCrawler(DefactoModel model, Map<Pattern, MetaQuery> queries) {
-
         this.patternToQueries = queries;
         this.model            = model;
     }
@@ -117,7 +116,7 @@ public class EvidenceCrawler {
         if ( Defacto.onlyTimes.equals(TIME_DISTRIBUTION_ONLY.NO) ) {
 
         	for ( String language : model.getLanguages() ) {
-        		
+        		System.out.println(language);
         		String subjectLabel = evidence.getModel().getSubjectLabel(language);
         		String objectLabel = evidence.getModel().getObjectLabel(language);
         		

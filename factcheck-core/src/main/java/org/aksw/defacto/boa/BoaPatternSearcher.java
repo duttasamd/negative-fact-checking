@@ -103,7 +103,7 @@ public class BoaPatternSearcher {
     public List<Pattern> querySolrIndex(String propertyUri, int numberOfBoaPatterns, double scoreThreshold, String language) {
 
     	
-    	 this.logger.debug("Querying solr index for uri: " + propertyUri + " and language " + language + "."); 
+    	//  this.logger.debug("Querying solr index for uri: " + propertyUri + " and language " + language + "."); 
     	
         Map<String,Pattern> patterns = new HashMap<String,Pattern>();
 
@@ -143,7 +143,7 @@ public class BoaPatternSearcher {
                 pattern.boaScore = (Double) d.get("SUPPORT_NUMBER_OF_PAIRS_LEARNED_FROM");
                 pattern.language = language;
                 
-                this.logger.debug("Found pattern: " + pattern.naturalLanguageRepresentation); 
+                // this.logger.debug("Found pattern: " + pattern.naturalLanguageRepresentation); 
                 
 //                System.out.println(pattern.getNormalized());
                 

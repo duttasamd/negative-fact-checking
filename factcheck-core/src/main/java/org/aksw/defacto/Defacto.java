@@ -149,7 +149,7 @@ public class Defacto {
 	}
 
 	public static void init(){
-
+		Defacto.onlyTimes = TIME_DISTRIBUTION_ONLY.NO;
 		try {
 
 			if ( Defacto.DEFACTO_CONFIG  == null ) {

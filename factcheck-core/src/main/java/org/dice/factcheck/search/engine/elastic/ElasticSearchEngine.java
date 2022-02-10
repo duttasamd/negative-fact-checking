@@ -40,12 +40,12 @@ public class ElasticSearchEngine extends DefaultSearchEngine {
 	private RestClient restClientobj;
 
 	public ElasticSearchEngine() {
+		this.restClientobj = RestClient.builder(new HttpHost(ELASTIC_SERVER , Integer.parseInt(ELASTIC_PORT), "http")).build();
 	}
 	
 	public static void init()
 	{
 		if ( Defacto.DEFACTO_CONFIG != null ) {
-
 			ELASTIC_SERVER = Defacto.DEFACTO_CONFIG.getStringSetting("elastic", "SERVER_ADDRESS");
 			ELASTIC_PORT = Defacto.DEFACTO_CONFIG.getStringSetting("elastic", "PORT_NUMBER");
 			NUMBER_OF_SEARCH_RESULTS = Defacto.DEFACTO_CONFIG.getStringSetting("crawl", "NUMBER_OF_SEARCH_RESULTS");
@@ -63,30 +63,47 @@ public class ElasticSearchEngine extends DefaultSearchEngine {
 
 		try {
 			List<WebSite> results = new ArrayList<WebSite>();
-
-			this.restClientobj = RestClient.builder(new HttpHost(ELASTIC_SERVER , Integer.parseInt(ELASTIC_PORT), "http")).build();
+			
 			String subject  = query.getSubjectLabel().replace("&", "and");
 			String property = normalizePredicate(query.getPropertyLabel().trim());
 			String object   = query.getObjectLabel().replace("&", "and");
 			String q1 = "\""+subject+" "+property+" "+object+"\"";
 			if ( query.getPropertyLabel().equals("??? NONE ???") )
 				q1 = "\""+subject+" "+object+"\"";
-			HttpEntity entity1 = new NStringEntity(
-					"{\n" +
-							"	\"size\" : 500 ,\n" +
-							"    \"query\" : {\n" +
-							"    \"match_phrase\" : {\n"+
-							"	 \"text\" : {\n" +
-							"	\"query\" : "+q1+",\n"+
-							"	\"slop\"  : 50 \n"+
-							"} \n"+
-							"} \n"+
-							"} \n"+
-							"}", ContentType.APPLICATION_JSON);
-			String index = Defacto.DEFACTO_CONFIG.getStringSetting("elastic", "INDEX");
-			String mapping = Defacto.DEFACTO_CONFIG.getStringSetting("elastic", "MAPPING");
 
-			Response response = restClientobj.performRequest("GET", "/"+index+"/"+mapping+"/_search",Collections.singletonMap("pretty", "true"),entity1);
+			// System.out.println("Query : " + q1);
+			// HttpEntity entity1 = new NStringEntity(
+			// 		"{\n" +
+			// 				"	\"size\" : 500 ,\n" +
+			// 				"    \"query\" : {\n" +
+			// 				"    \"match_phrase\" : {\n"+
+			// 				"	 \"text\" : {\n" +
+			// 				"	\"query\" : "+q1+",\n"+
+			// 				"	\"slop\"  : 50 \n"+
+			// 				"} \n"+
+			// 				"} \n"+
+			// 				"} \n"+
+			// 				"}", ContentType.APPLICATION_JSON);
+
+			String jsquery = "{\n" +
+            "	\"size\" : 500 ,\n" +
+            "    \"query\" : {\n" +
+            "       \"match_phrase\" : {\n"+
+            "           \"Article\" : { \n" +
+            "               \"query\" : "+q1+",\n" +
+            "               \"slop\" : 50\n" +
+            "           } \n"+
+            "       } \n"+
+            "    } \n"+
+            "} \n";
+
+			HttpEntity entity1 = new NStringEntity(jsquery
+                    , ContentType.APPLICATION_JSON);
+
+			String index = Defacto.DEFACTO_CONFIG.getStringSetting("elastic", "INDEX");
+			// String mapping = Defacto.DEFACTO_CONFIG.getStringSetting("elastic", "MAPPING");
+
+			Response response = restClientobj.performRequest("GET", "/" + index + "/_search",Collections.singletonMap("pretty", "true"),entity1);
 			String json = EntityUtils.toString(response.getEntity());			
 			//System.out.println(json);
 			ObjectMapper mapper = new ObjectMapper();
@@ -103,28 +120,29 @@ public class ElasticSearchEngine extends DefaultSearchEngine {
 			int number_of_search_results = Integer.parseInt(NUMBER_OF_SEARCH_RESULTS);
 			if(!(docCount<number_of_search_results))
 				docCount = number_of_search_results;
-			//System.out.println(docCount);
+			// System.out.println("Doc count : " + docCount);
 			for(int i=0; i<docCount; i++)
 			{
 				JsonNode document = hits.get("hits").get(i).get("_source");
-				JsonNode articleNode = document.get("text");
-				JsonNode articleTitleNode = document.get("title");
-				JsonNode pagerank = document.get("popularity_score");
-				String articleText = articleNode.asText();
-				String articleURL = "https://en.wikipedia.org/wiki/"+articleTitleNode.asText();
-				String articleTitle = articleTitleNode.asText();
-				WebSite website = new WebSite(query, articleURL);
-				website.setTitle(articleTitle);
-				website.setText(articleText);
-				website.setRank(Float.parseFloat(pagerank.asText()));
-				website.setLanguage(query.getLanguage());
-				website.setPredicate(property);
-				results.add(website);
+                JsonNode articleNode = document.get("Article");
+                JsonNode articleURLNode = document.get("URL");
+                JsonNode articleTitleNode = document.get("Title");
+                JsonNode pagerank = document.get("Pagerank");
+                String articleText = articleNode.asText();
+                String articleURL = articleURLNode.asText();
+                String articleTitle = articleTitleNode.asText();
+                WebSite website = new WebSite(query, articleURL);
+                website.setTitle(articleTitle);
+                website.setText(articleText);
+                website.setRank(Float.parseFloat(pagerank.asText()));
+                website.setLanguage(query.getLanguage());
+                website.setPredicate(property);
+                results.add(website);
 			}
 			return new DefaultSearchResult(results, new Long(docCount), query, pattern, false);
 		}
 		catch (Exception e) {
-
+			e.printStackTrace();
 			logger.info("Issue with the running Elastic search instance. Please check if the instance is running! "+e.getMessage());
 			return new DefaultSearchResult(new ArrayList<WebSite>(), 0L, query, pattern, false);
 		}
