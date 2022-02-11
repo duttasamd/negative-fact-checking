@@ -6,6 +6,7 @@ import org.aksw.defacto.boa.Pattern;
 import org.aksw.defacto.evidence.Evidence;
 import org.aksw.defacto.evidence.WebSite;
 import org.aksw.defacto.model.DefactoModel;
+import org.aksw.defacto.search.fact.FactSearcher;
 import org.aksw.defacto.search.fact.SubjectObjectFactSearcher;
 import org.apache.log4j.Logger;
 import org.dice.factcheck.proof.extract.SubjectObjectProofExtractor;
@@ -17,10 +18,10 @@ import org.dice.factcheck.proof.extract.SubjectObjectProofExtractor;
 public class WebSiteScoreCallable implements Callable<WebSite> {
 
     private DefactoModel model;
-    private Pattern pattern;
+    protected Pattern pattern;
     private WebSite website;
     private Evidence evidence;
-    SubjectObjectProofExtractor searcher = new SubjectObjectProofExtractor();
+    protected FactSearcher searcher = new SubjectObjectProofExtractor();
     
     /**
      * 
@@ -34,6 +35,14 @@ public class WebSiteScoreCallable implements Callable<WebSite> {
         this.website  = website;
         this.model    = model;
         this.evidence = evidence;
+    }
+
+    public WebSiteScoreCallable(WebSite website, Evidence evidence, DefactoModel model, FactSearcher searcher) {
+
+        this.website  = website;
+        this.model    = model;
+        this.evidence = evidence;
+        this.searcher = searcher;
     }
 
     @Override

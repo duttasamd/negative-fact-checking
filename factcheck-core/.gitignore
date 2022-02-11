@@ -16,3 +16,6 @@ log/info.log
 log/factConfirmation.html
 repo/
 
+**/.DS_Store
+.vscode/
+.factorypath

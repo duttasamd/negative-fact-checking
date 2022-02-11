@@ -12,7 +12,7 @@ import weka.core.Instance;
  */
 public class ComplexProof {
 
-    private Instance instance = new Instance(AbstractFactFeatures.factFeatures.numAttributes());
+    protected Instance instance = new Instance(AbstractFactFeatures.factFeatures.numAttributes());
     
     private Pattern pattern;
     private WebSite website;

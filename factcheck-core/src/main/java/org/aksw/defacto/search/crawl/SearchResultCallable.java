@@ -20,7 +20,7 @@ public class SearchResultCallable implements Callable<SearchResult> {
 
     private MetaQuery query;
     private Pattern pattern;
-    private SearchEngine engine;
+    protected SearchEngine engine;
     
     public SearchResultCallable(MetaQuery query, Pattern pattern) {
 

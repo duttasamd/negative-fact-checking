@@ -10,36 +10,23 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-import java.util.*;
-
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.dice.factcheck.search.engine.elastic.ElasticSearchEngine;
+import org.dice.nfactcheck.patterns.ClosestPredicate;
 
-import javassist.bytecode.stackmap.BasicBlock.Catch;
 
 import org.aksw.defacto.model.DefactoModel;
 import org.aksw.defacto.Defacto;
-import org.aksw.defacto.boa.Pattern;
-
-import org.aksw.defacto.search.query.MetaQuery;
-import org.aksw.defacto.search.query.QueryGenerator;
-import org.aksw.defacto.ml.feature.evidence.EvidenceFeatureExtractor;
-import org.aksw.defacto.ml.feature.evidence.EvidenceScorer;
-import org.aksw.defacto.ml.feature.fact.FactFeatureExtraction;
-import org.aksw.defacto.ml.feature.fact.FactScorer;
-
-import org.aksw.defacto.util.TimeUtil;
-import org.aksw.defacto.search.crawl.*;
-import org.aksw.defacto.evidence.*;
 
 public class TestModel {
     private static int modelCount = 0;
     public static void main(String[] args) throws IOException {
         Defacto.init();
         ElasticSearchEngine.init();
+        ClosestPredicate.init();
 
-        PrintWriter writer = new PrintWriter("data/results/results_factcheck_.txt", "UTF-8");
+        PrintWriter writer = new PrintWriter("data/results/results_nfactcheck_0.txt", "UTF-8");
         try (Stream<String> lines = Files.lines(Paths.get("data/FactBench/test/domain/" + "test.txt"), Charset.defaultCharset())) {
             for (String line : lines.toArray(String[]::new)) {
                 try {
@@ -73,7 +60,6 @@ public class TestModel {
         }
 
         try {
-            
             DefactoModel defactoModel = new DefactoModel(model, splits[0] + splits[1] + splits[2], true, Arrays.asList("en"));
             System.out.println("here");
             // defactoModel.setCorrect(true);
@@ -81,13 +67,19 @@ public class TestModel {
             System.out.println(defactoModel.getSubjectLabel("en") + " " + defactoModel.getPropertyUri() +
                 " " + defactoModel.getObjectLabel("en"));
             
-            double factCheckScore = processFactcheck(defactoModel);
+            double score = 0.0;
+
+            if(algorithm.equals("Factcheck")) {
+                score = Factcheck.checkFact(defactoModel);
+            } else {
+                score = NFactcheck.checkFact(defactoModel);
+            }
 
             StringBuilder resultTriple = new StringBuilder();
             resultTriple.append("<http://swc2019.dice-research.org/task/dataset/s-");
             resultTriple.append(String.format("%5s", Integer.toString(TestModel.modelCount)).replace(" ", "0"));
             resultTriple.append("> <http://swc2017.aksw.org/hasTruthValue> ");
-            resultTriple.append(factCheckScore);
+            resultTriple.append(score);
             resultTriple.append("^^<http://www.w3.org/2001/XMLSchema#double> .");
 
             pw.println(resultTriple.toString());
@@ -100,26 +92,11 @@ public class TestModel {
         }
     }
 
-    private static double processFactcheck(DefactoModel defactoModel) {
-        QueryGenerator queryGenerator = new QueryGenerator(defactoModel);
-        Map<Pattern, MetaQuery> metaqueries = queryGenerator.getSearchEngineQueries("en");
+    // private static double processFactcheck(DefactoModel defactoModel) {
+        
+    // }
 
-        EvidenceCrawler crawler = new EvidenceCrawler(defactoModel, metaqueries);
-        Evidence evidence  = crawler.crawlEvidence();
-        evidence.setBoaPatterns("en", new ArrayList<>(metaqueries.keySet()));
-
-		FactFeatureExtraction factFeatureExtraction = new FactFeatureExtraction();
-		factFeatureExtraction.extractFeatureForFact(evidence);
-
-        FactScorer factScorer = new FactScorer();
-		factScorer.scoreEvidence(evidence);
-
-        EvidenceFeatureExtractor featureCalculator = new EvidenceFeatureExtractor();
-		featureCalculator.extractFeatureForEvidence(evidence);
-
-        EvidenceScorer evidenceScorer = new EvidenceScorer();
-		evidenceScorer.scoreEvidence(evidence);
-
-        return evidence.getDeFactoScore();
-    }
+    // private static double processNFactcheck(DefactoModel defactoModel) {
+        
+    // }
 }

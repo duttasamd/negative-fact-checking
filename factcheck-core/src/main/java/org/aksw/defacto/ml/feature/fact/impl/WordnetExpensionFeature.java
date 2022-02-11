@@ -22,7 +22,7 @@ import org.aksw.defacto.wordnet.WordNetExpansion;
  */
 public class WordnetExpensionFeature implements FactFeature {
 	
-	private static WordNetExpansion wordnetExpansion;
+	protected static WordNetExpansion wordnetExpansion;
 
 //    WordNetExpansion wordnetExpansion = new WordNetExpansion(new File(WordnetExpensionFeature.class.getResource("/wordnet/dict").getFile()).getAbsolutePath());
 	public static void init()

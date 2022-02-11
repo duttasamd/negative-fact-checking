@@ -36,7 +36,7 @@ public class QueryGenerator {
 
     public static final BoaPatternSearcher patternSearcher = new BoaPatternSearcher();
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryGenerator.class);
-    private DefactoModel model;
+    protected DefactoModel model;
     
     /**
      * 

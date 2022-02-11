@@ -35,9 +35,9 @@ public class ElasticSearchEngine extends DefaultSearchEngine {
 
 	private static String NUMBER_OF_SEARCH_RESULTS;
 	private static String ELASTIC_SERVER;
-	private static Logger logger =  Logger.getLogger(ElasticSearchEngine.class);
+	protected static Logger logger =  Logger.getLogger(ElasticSearchEngine.class);
 	private static String ELASTIC_PORT;
-	private RestClient restClientobj;
+	protected RestClient restClientobj;
 
 	public ElasticSearchEngine() {
 		this.restClientobj = RestClient.builder(new HttpHost(ELASTIC_SERVER , Integer.parseInt(ELASTIC_PORT), "http")).build();

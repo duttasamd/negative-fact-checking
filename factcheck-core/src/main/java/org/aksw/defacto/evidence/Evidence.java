@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -34,7 +33,7 @@ import weka.core.Instance;
  */
 public class Evidence {
 
-    private DefactoModel model;
+    protected DefactoModel model;
     private Map<Pattern,List<WebSite>> webSites         = new LinkedHashMap<Pattern,List<WebSite>>();
     private Map<String,List<Word>> topicTerms           = new HashMap<String,List<Word>>();
 //    private Map<Pattern,Double[][]> similarityMatricies = new LinkedHashMap<Pattern,Double[][]>();
@@ -45,12 +44,12 @@ public class Evidence {
     public Map<String,Long> mediumContextYearOccurrences = new LinkedHashMap<String, Long>();
     public Map<String,Long> largeContextYearOccurrences = new LinkedHashMap<String, Long>();
     
-    private Instance features;
+    protected Instance features;
     private Long totalHitCount;
     private double deFactoScore;
     
-    private Set<ComplexProof> complexProofs;
-    private Map<String,List<Pattern>> boaPatterns = new HashMap<String,List<Pattern>>();
+    protected Set<ComplexProof> complexProofs;
+    protected Map<String,List<Pattern>> boaPatterns = new HashMap<String,List<Pattern>>();
 	public List<Match> dates = new ArrayList<Match>();
 	public DefactoTimePeriod defactoTimePeriod;
 	public PatternTimePeriodSearcher tsSearcher = new PatternTimePeriodSearcher();

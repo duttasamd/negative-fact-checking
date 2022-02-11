@@ -50,11 +50,11 @@ import edu.stanford.nlp.pipeline.StanfordCoreNLPClient;
  */
 public class EvidenceCrawler {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(EvidenceCrawler.class);
+	protected static final Logger LOGGER = LoggerFactory.getLogger(EvidenceCrawler.class);
     java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("[0-9]{4}");
-    private Map<Pattern,MetaQuery> patternToQueries;
-    private DefactoModel model;
-    BoaPatternSearcher searcher = new BoaPatternSearcher();
+    protected Map<Pattern,MetaQuery> patternToQueries;
+    protected DefactoModel model;
+    protected BoaPatternSearcher searcher = new BoaPatternSearcher();
     
     public static Map<DefactoModel,Evidence> evidenceCache = new HashMap<DefactoModel,Evidence>();
     
@@ -171,7 +171,7 @@ public class EvidenceCrawler {
      * 
      * @return
      */
-	private Set<SearchResult> generateSearchResultsInParallel() {
+	protected Set<SearchResult> generateSearchResultsInParallel() {
 
         Set<SearchResult> results = new HashSet<SearchResult>();
         Set<SearchResultCallable> searchResultCallables = new HashSet<SearchResultCallable>();
@@ -201,7 +201,7 @@ public class EvidenceCrawler {
         return results;
     }
 
-    private void scoreSearchResults(Set<SearchResult> searchResults, DefactoModel model, Evidence evidence) {
+    protected void scoreSearchResults(Set<SearchResult> searchResults, DefactoModel model, Evidence evidence) {
 
         // ########################################
     	// 1. Score the websites 
@@ -257,7 +257,7 @@ public class EvidenceCrawler {
      * 
      * @param patternToSearchResults
      */
-    private void filterSearchResults(Set<SearchResult> searchResults) {
+    protected void filterSearchResults(Set<SearchResult> searchResults) {
 
         // this should remove the duplicates from the list
         Set<String> alreadyKnowUrls = new HashSet<String>();
