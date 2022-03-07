@@ -1,18 +1,18 @@
+import java.io.PrintWriter;
 import java.util.*;
 
 import org.aksw.defacto.boa.Pattern;
 import org.aksw.defacto.model.DefactoModel;
 import org.aksw.defacto.search.query.MetaQuery;
-import org.aksw.defacto.util.TimeUtil;
 import org.aksw.defacto.evidence.*;
-import org.aksw.defacto.ml.feature.evidence.EvidenceFeatureExtractor;
 import org.dice.nfactcheck.evidence.NComplexProof;
 import org.dice.nfactcheck.evidence.NEvidence;
+import org.dice.nfactcheck.ml.feature.evidence.NEvidenceFeatureExtractor;
 import org.dice.nfactcheck.ml.feature.evidence.NEvidenceScorer;
 import org.dice.nfactcheck.ml.feature.fact.NFactFeatureExtraction;
 import org.dice.nfactcheck.ml.feature.fact.NFactScorer;
 import org.dice.nfactcheck.ml.feature.fact.impl.NDependencyParseFeature;
-import org.dice.nfactcheck.ml.feature.fact.impl.NERFeature;
+import org.dice.nfactcheck.ml.feature.fact.impl.SubjectObjectFeature;
 import org.dice.nfactcheck.patterns.ClosestPredicate;
 import org.dice.nfactcheck.proof.filter.ProofFilter;
 import org.dice.nfactcheck.search.crawl.NEvidenceCrawler;
@@ -22,11 +22,10 @@ public class NFactcheck {
 
 
 
-    public static double checkFact(DefactoModel model) {
-        // double factcheckScore = Factcheck.checkFact(model);
+    public static double checkFact(DefactoModel model, PrintWriter log) {
+        double factcheckScore = Factcheck.checkFact(model);
         
-        model.wildcardNERTag = ClosestPredicate.getWildcardNerTag(model.getPropertyUri());
-        System.out.println("Wildcard NER Set = " + model.wildcardNERTag);
+        model.wildcardNERTags = ClosestPredicate.getWildcardNerTags(model.getPropertyUri());
         WQueryGenerator queryGenerator = new WQueryGenerator(model);
         Map<Pattern, MetaQuery> metaqueries = queryGenerator.generateSearchQueries();
 
@@ -34,12 +33,15 @@ public class NFactcheck {
         NEvidence evidence  = (NEvidence) crawler.crawlEvidence();
         evidence.setBoaPatterns("en", new ArrayList<>(metaqueries.keySet()));
 
+        // System.out.println("PROOF COUNT : " + Integer.toString(evidence.getComplexProofs().size()));
+
         Set<ComplexProof> complexProofs = evidence.getComplexProofs();
 
-        NERFeature nerFeature = new NERFeature();
+        SubjectObjectFeature subObjExtractor = new SubjectObjectFeature();
 
         for (ComplexProof complexProof : complexProofs) {
-            nerFeature.extractFeature(complexProof, evidence);
+            NComplexProof nproof = (NComplexProof) complexProof;
+            subObjExtractor.extract(nproof);
         }
 
         ProofFilter.filterProofs(evidence);
@@ -49,7 +51,7 @@ public class NFactcheck {
         NDependencyParseFeature dParseFeature = new NDependencyParseFeature();
 
         for (ComplexProof complexProof : complexProofs) {
-            dParseFeature.extractFeature2(complexProof, evidence);
+            dParseFeature.extractFeature(complexProof, evidence);
         }
 
         ProofFilter.filterProofs(evidence);
@@ -57,29 +59,43 @@ public class NFactcheck {
         NFactFeatureExtraction nfactFeatureExtraction = new NFactFeatureExtraction();
 		nfactFeatureExtraction.extractFeatureForFact(evidence);
 
+        // System.out.println("Scoring Facts");
         NFactScorer nfactScorer = new NFactScorer();
 		nfactScorer.scoreEvidence(evidence);
 
-        EvidenceFeatureExtractor featureCalculator = new EvidenceFeatureExtractor();
-		featureCalculator.extractFeatureForEvidence(evidence);
+        // System.out.println("Extracting evidence features");
+        NEvidenceFeatureExtractor nfeatureCalculator = new NEvidenceFeatureExtractor();
+		nfeatureCalculator.extractFeatureForEvidence(evidence);
 
-        NEvidenceScorer nevidenceScorer = new NEvidenceScorer();
-		nevidenceScorer.scoreEvidence(evidence);
+        if(evidence.getComplexProofs().size() > 0) {
+            // System.out.println("Scoring");
+            NEvidenceScorer nevidenceScorer = new NEvidenceScorer();
+            nevidenceScorer.scoreEvidence(evidence);
 
-        List<ComplexProof> sortedComplexProofs = new ArrayList<>(evidence.getComplexProofs());
+            int count = 3;
 
-        Collections.sort(sortedComplexProofs, (o1, o2) -> Double.compare(o1.getScore(),o2.getScore()));
+            List<ComplexProof> sortedComplexProofs = new ArrayList<>(evidence.getComplexProofs());
+            Collections.sort(sortedComplexProofs, (o1, o2) -> Double.compare(o2.getScore(),o1.getScore()));
             
-        if(sortedComplexProofs.size() > 0) {
-            for (ComplexProof proof : sortedComplexProofs) {
-                NComplexProof nproof = (NComplexProof) proof;
-                System.out.println("["+ Double.toString(proof.getScore()) + " " + nproof.getMatchedObject() + "] "+ " -> " + proof.getWebSite().getUrl());
-                System.out.println(proof.getProofPhrase());
-                System.out.println(proof.getFeatures().toString());
+            if(sortedComplexProofs.size() > 0) {
+                for (ComplexProof proof : sortedComplexProofs) {
+                    NComplexProof nproof = (NComplexProof) proof;
+                    if(--count < 0) {
+                        break;
+                    }
+
+                    if((evidence.getDeFactoScore() > 0.5 && model.isCorrect()) || (evidence.getDeFactoScore() < 0.5 && !model.isCorrect()) || nproof.getScore() > 0.5) {
+                        model.setAcceptableProofsFound(true);
+                        log.println("--");
+                        log.println(proof.getWebSite().getUrl());
+                        log.println(proof.getProofPhrase());
+                    }
+                }
             }
+
+            return evidence.getDeFactoScore();
+        } else {
+            return evidence.getFactcheckScore();
         }
-
-        return evidence.getDeFactoScore();
-
-    } 
+    }
 }

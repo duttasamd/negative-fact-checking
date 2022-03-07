@@ -8,6 +8,8 @@ import org.dice.nfactcheck.evidence.NComplexProof;
 import org.dice.nfactcheck.evidence.NEvidence;
 import org.dice.nfactcheck.ml.feature.fact.NAbstractFactFeatures;
 
+import uk.ac.shef.wit.simmetrics.similaritymetrics.Levenshtein;
+
 
 public class WildcardCountFeature {
     public static void extractFeature(NEvidence evidence) {
@@ -17,11 +19,11 @@ public class WildcardCountFeature {
         for (ComplexProof proof : proofs) {
             NComplexProof nproof = (NComplexProof) proof;
             if(nproof.getProbableWildcardWords() != null && nproof.getProbableWildcardWords().size() > 0) {
-                for (String probableWildcard : nproof.getProbableWildcardWords()) {
-                    if(nerCountMap.containsKey(probableWildcard)) {
-                        nerCountMap.replace(probableWildcard, nerCountMap.get(probableWildcard) + 1);
+                for (Entry<String,Integer> probableWildcard : nproof.getProbableWildcardWords()) {
+                    if(nerCountMap.containsKey(probableWildcard.getKey())) {
+                        nerCountMap.replace(probableWildcard.getKey(), nerCountMap.get(probableWildcard.getKey()) + 1);
                     } else {
-                        nerCountMap.put(probableWildcard, 1);
+                        nerCountMap.put(probableWildcard.getKey(), 1);
                     }
                 }
             }
@@ -39,41 +41,39 @@ public class WildcardCountFeature {
         });
 
         evidence.setWildcardCountList(entries);
-
-        int limit = 5;
-
-        if(entries.size() < 5) {
-            limit = entries.size();
-        }
-
-        // for(int i=0; i<entries.size(); i++) {
-        //     String nerTag = entries.get(i).getKey();
-        //     System.out.print(nerTag + Integer.toString(entries.get(i).getValue()) + "-" + Integer.toString(5 - i) + ", ");
-        // }
-        // System.out.println();
+        Levenshtein lev = new Levenshtein();
 
         for (ComplexProof proof : proofs) {
-            int nerScore = 0;
+            NComplexProof nproof = (NComplexProof) proof;
+            double wildcardScore = 0;
             int count = 0;
+
+            int limit = 5;
+            if(entries.size() < 5) {
+                limit = entries.size();
+            }
+
             for(int i=0; i<limit; i++) {
-                String nerTag = entries.get(i).getKey();
-                // System.out.println(nerTag);
-                double getFractionalMatch = getFractionalMatch(nerTag, proof.getProofPhrase());
-                if(getFractionalMatch > 0.4) {
+                String wildcardTag = entries.get(i).getKey();
+                double fractionalMatch = 0.0;
+
+                if(nproof.getIsSubjectWildcard()) {
+                    fractionalMatch = getFractionalMatch(nproof.getMatchedSubject(), wildcardTag);
+                    wildcardScore += lev.getSimilarity(nproof.getMatchedSubject(), wildcardTag) * entries.get(i).getValue();
+                } else {
+                    fractionalMatch = getFractionalMatch(nproof.getMatchedObject(), wildcardTag);
+                    wildcardScore += lev.getSimilarity(nproof.getMatchedObject(), wildcardTag) * entries.get(i).getValue();
+                }                
+
+                if(fractionalMatch > 0.5) {
                     count++;
-                    nerScore += (5 - i);
                 }
             }
 
-            // System.out.println("Wildcard score : " + Integer.toString(nerScore));
-            // System.out.println("Wildcard count : " + Integer.toString(count));
+            wildcardScore /= limit;
 
-            proof.getFeatures().setValue(NAbstractFactFeatures.WILDCARD_SCORE, nerScore);
+            proof.getFeatures().setValue(NAbstractFactFeatures.WILDCARD_SCORE, wildcardScore);
             proof.getFeatures().setValue(NAbstractFactFeatures.WILDCARD_COUNT, count);
-
-            // if(proof.getFeatures().stringValue(NAbstractFactFeatures.CLASS) == "acceptable") {
-            //     System.out.println("[" + Integer.toString(nerScore) + "|" + Integer.toString(count) + "] " + proof.getProofPhrase());
-            // }
         }
     }
 

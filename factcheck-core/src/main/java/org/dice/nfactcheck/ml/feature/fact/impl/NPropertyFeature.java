@@ -22,13 +22,6 @@ public class NPropertyFeature implements FactFeature {
      */
     @Override
     public void extractFeature(ComplexProof proof, Evidence evidence) {
-        // if(proof.getClass() == NComplexProof.class) {
-        //     NComplexProof nProof = (NComplexProof) proof;
-
-        //     if(nProof.getProbableWildcardWords() == null 
-        //         || nProof.getProbableWildcardWords().size() == 0)
-        //         return;
-        // }
     	String uri = proof.getModel().getPropertyUri().replace("http://dbpedia.org/ontology/", "");
     	if ( uri.equals("office") ) uri = "leaderName";
         proof.getFeatures().setValue(NAbstractFactFeatures.PROPERTY_NAME, uri);

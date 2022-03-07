@@ -67,6 +67,7 @@ public class ElasticSearchEngine extends DefaultSearchEngine {
 			String subject  = query.getSubjectLabel().replace("&", "and");
 			String property = normalizePredicate(query.getPropertyLabel().trim());
 			String object   = query.getObjectLabel().replace("&", "and");
+
 			String q1 = "\""+subject+" "+property+" "+object+"\"";
 			if ( query.getPropertyLabel().equals("??? NONE ???") )
 				q1 = "\""+subject+" "+object+"\"";
@@ -110,6 +111,7 @@ public class ElasticSearchEngine extends DefaultSearchEngine {
 			JsonNode rootNode = mapper.readValue(json, JsonNode.class);
 			JsonNode hits = rootNode.get("hits");
 			JsonNode hitCount = hits.get("total");
+
 			int docCount = 0;
 			if(hitCount.has("value")) {
 				docCount = Integer.parseInt(hitCount.get("value").asText());
@@ -117,6 +119,7 @@ public class ElasticSearchEngine extends DefaultSearchEngine {
 				//TODO check it is correct
 					docCount = Integer.parseInt(hitCount.asText());
 			}
+
 			int number_of_search_results = Integer.parseInt(NUMBER_OF_SEARCH_RESULTS);
 			if(!(docCount<number_of_search_results))
 				docCount = number_of_search_results;

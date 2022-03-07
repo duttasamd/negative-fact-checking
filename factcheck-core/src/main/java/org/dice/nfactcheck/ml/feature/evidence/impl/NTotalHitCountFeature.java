@@ -15,5 +15,6 @@ public class NTotalHitCountFeature extends AbstractEvidenceFeature {
     public void extractFeature(Evidence evidence) {
         NEvidence nevidence = (NEvidence) evidence;
         nevidence.getFeatures().setValue(NAbstractEvidenceFeatures.TOTAL_HIT_COUNT_FEATURE, evidence.getTotalHitCount());
+        // System.out.println("Total hits : " + Double.toString(evidence.getTotalHitCount()));
     }
 }

@@ -14,13 +14,13 @@ public class NFactCheckDemo {
         ClosestPredicate.init();
 
         final Model model = ModelFactory.createDefaultModel();
-        model.read(DefactoModel.class.getResourceAsStream("/PaulHaarhuis.ttl"), null,
+        model.read(DefactoModel.class.getResourceAsStream("/PierreTrudeau.ttl"), null,
                 "TURTLE");
 
         DefactoModel defactoModel = new DefactoModel(model, "NB", true, Arrays.asList("en"));
 
-        double score = NFactcheck.checkFact(defactoModel);
+        // double score = NFactcheck.checkFact(defactoModel);
 
-        System.out.println("Score : " + Double.toString(score));
+        // System.out.println("Score : " + Double.toString(score));
     }
 }

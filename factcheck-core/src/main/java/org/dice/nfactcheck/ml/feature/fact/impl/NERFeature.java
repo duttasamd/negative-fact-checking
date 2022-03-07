@@ -5,7 +5,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import org.aksw.defacto.evidence.ComplexProof;
 import org.aksw.defacto.evidence.Evidence;
@@ -16,10 +20,12 @@ import org.aksw.defacto.nlp.sbd.StanfordNLPSentenceBoundaryDisambiguation;
 import org.dice.nfactcheck.evidence.NComplexProof;
 import org.dice.nfactcheck.ml.feature.fact.NAbstractFactFeatures;
 import org.dice.nfactcheck.ml.feature.fact.NFactFeatureExtraction;
+import org.dice.nfactcheck.proof.extract.CorefResolution;
 
 import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.CoreAnnotations.AnswerAnnotation;
+import edu.stanford.nlp.pipeline.Annotation;
 
 public class NERFeature implements FactFeature {
 
@@ -42,42 +48,54 @@ public class NERFeature implements FactFeature {
     public void extractFeature(ComplexProof proof, Evidence evidence) {
 
         NComplexProof nproof = (NComplexProof) proof;
-        String wildcardNERTag = evidence.getModel().wildcardNERTag;
+        Set<String> wildcardNERTags = evidence.getModel().wildcardNERTags;
 
-        if(wildcardNERTag == null) {
+        if(wildcardNERTags == null) {
             return;
         }
 
-        List<String> probableInterestElements = new ArrayList<String>();
+        List<Entry<String, Integer>> probableInterestElements = new ArrayList<Entry<String, Integer>>();
 
         boolean isList = false;
 
-        for ( List<CoreLabel> sentence : ((List<List<CoreLabel>>) classifier.classify(proof.getProofPhrase())) ) {
+        Annotation doc = evidence.getModel().corenlpClient.corefAnnotation(proof.getProofPhrase());
+		String resolvedString = CorefResolution.applyCorefResolution(doc);
+
+        // System.out.println(resolvedString);
+
+        for ( List<CoreLabel> sentence : ((List<List<CoreLabel>>) classifier.classify(resolvedString)) ) {
             boolean keepGoing = false;
             boolean commaEncountered = false;
             
-            Queue<String> interestElementsQueue = new LinkedList<String>();
-
+            Queue<Entry<String, Integer>> interestElementsQueue = new LinkedList<Entry<String, Integer>>();
+            int index = 1;
             for ( CoreLabel word : sentence ) {
-                // System.out.print(word.word() + " [" + word.get(AnswerAnnotation.class) + "] ");
+
                 if(!keepGoing && interestElementsQueue.size() > 0) {
                     StringBuilder sb = new StringBuilder();
-
+                    int lastIndex = -1;
                     while(!interestElementsQueue.isEmpty()) {
-                        String element = interestElementsQueue.poll();
+                        Entry<String, Integer> element = interestElementsQueue.poll();
 
-                        if(element.equals(",") && !isList && !interestElementsQueue.isEmpty()) {
+                        if(lastIndex < 0) {
+                            lastIndex = element.getValue();
+                        }
+
+                        // System.out.println("Element : " + element.getKey() + " -> " + Integer.toString(element.getValue()) + " last -> " + Integer.toString(lastIndex));
+                        
+                        if(element.getKey().equals(",") && !isList && !interestElementsQueue.isEmpty()) {
                             sb.append("\b, ");
-                        } else if(element.equals(",") && isList) {
-                            probableInterestElements.add(sb.toString().trim());
+                        } else if(element.getKey().equals(",") && isList) {
+                            probableInterestElements.add(Map.entry(sb.toString().trim(), lastIndex));
+                            lastIndex = -1;
                             sb.setLength(0);
-                        } else if(!(element.equals(",") && interestElementsQueue.isEmpty())) {
-                            sb.append(element + " ");
+                        } else if(!(element.getKey().equals(",") && interestElementsQueue.isEmpty())) {
+                            sb.append(element.getKey() + " ");
                         }
                     }
 
                     if(sb.length() > 0) {
-                        probableInterestElements.add(sb.toString().trim());
+                        probableInterestElements.add(Map.entry(sb.toString().trim(), lastIndex));
                     }
 
                     commaEncountered = false;
@@ -86,11 +104,12 @@ public class NERFeature implements FactFeature {
 
                 String normalizedTag = NamedEntityTagNormalizer.NAMED_ENTITY_TAG_MAPPINGS.get(word.get(AnswerAnnotation.class));
                 
-                if(wildcardNERTag.equals(normalizedTag)) {
-                    interestElementsQueue.add(word.word());
+                if(wildcardNERTags.contains(normalizedTag)) {
+                    // System.out.println("NER :" + word.word() + Integer.toString(index));
+                    interestElementsQueue.add(Map.entry(word.word(), index));
                     keepGoing = true;
                 } else if(keepGoing && word.word().equals(",")) {
-                    interestElementsQueue.add(",");
+                    interestElementsQueue.add(Map.entry(word.word(), index));
                     if(commaEncountered) {
                         isList = true;
                     }
@@ -99,26 +118,38 @@ public class NERFeature implements FactFeature {
                 } else {
                     keepGoing = false;
                 }
+
+                index++;
             }
         
+            // System.out.println("Interest Elements Queue : " + Integer.toString(interestElementsQueue.size()));
+
             if(interestElementsQueue.size() > 0) {
                 StringBuilder sb = new StringBuilder();
-
+                int lastIndex = -1;
                 while(!interestElementsQueue.isEmpty()) {
-                    String element = interestElementsQueue.poll();
+                    Entry<String, Integer> element = interestElementsQueue.poll();
 
-                    if(element.equals(",") && !isList && !interestElementsQueue.isEmpty()) {
+                    if(lastIndex < 0) {
+                        lastIndex = element.getValue();
+                    }
+
+                    // System.out.println("Element : " + element.getKey() + " -> " + Integer.toString(element.getValue()) + " last -> " + Integer.toString(lastIndex));
+                    
+
+                    if(element.getKey().equals(",") && !isList && !interestElementsQueue.isEmpty()) {
                         sb.append("\b, ");
-                    } else if(element.equals(",") && isList) {
-                        probableInterestElements.add(sb.toString().trim());
+                    } else if(element.getKey().equals(",") && isList) {
+                        probableInterestElements.add(Map.entry(sb.toString().trim(), lastIndex));
+                        lastIndex = -1;
                         sb.setLength(0);
-                    } else if(!(element.equals(",") && interestElementsQueue.isEmpty())) {
-                        sb.append(element + " ");
+                    } else if(!(element.getKey().equals(",") && interestElementsQueue.isEmpty())) {
+                        sb.append(element.getKey() + " ");
                     }
                 }
 
                 if(sb.length() > 0) {
-                    probableInterestElements.add(sb.toString().trim());
+                    probableInterestElements.add(Map.entry(sb.toString().trim(), lastIndex));
                 }
 
                 commaEncountered = false;
@@ -126,11 +157,14 @@ public class NERFeature implements FactFeature {
             }
         }
         
-        if(probableInterestElements.contains(evidence.getModel().getSubjectLabel("en"))) {
-            probableInterestElements.removeAll(
-                Arrays.asList(evidence.getModel().getSubjectLabel("en").split(" "))
-            );
-        }
+        // if(probableInterestElements.contains(evidence.getModel().getSubjectLabel("en"))) {
+        //     probableInterestElements.removeAll(
+        //         Arrays.asList(evidence.getModel().getSubjectLabel("en").split(" "))
+        //     );
+        // }
+
+        // probableInterestElements.stream()
+        //     .filter(p -> .contains(p->getKey())).collect(Collectors.toList());
 
         if(probableInterestElements.size() == 0) {
             // System.out.println("Remove : [Interest word] " + nproof.getProofPhrase());

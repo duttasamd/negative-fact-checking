@@ -1,8 +1,6 @@
 package org.dice.nfactcheck.ml.feature.evidence.impl;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import org.aksw.defacto.evidence.ComplexProof;
@@ -12,6 +10,7 @@ import org.aksw.defacto.model.DefactoModel;
 import org.dice.nfactcheck.evidence.NComplexProof;
 import org.dice.nfactcheck.evidence.NEvidence;
 import org.dice.nfactcheck.ml.feature.evidence.NAbstractEvidenceFeatures;
+import org.dice.nfactcheck.patterns.ClosestPredicate;
 
 import uk.ac.shef.wit.simmetrics.similaritymetrics.AbstractStringMetric;
 import uk.ac.shef.wit.simmetrics.similaritymetrics.Levenshtein;
@@ -22,7 +21,6 @@ public class NERWildcardMatchFeature extends AbstractEvidenceFeature {
     public void extractFeature(Evidence evidence) {
         NEvidence nevidence = (NEvidence) evidence;
         DefactoModel model = evidence.getModel();
-        String[] objectLabels = model.getObjectLabel("en").split("[\\s*\\.,]");
         AbstractStringMetric sw_metric = new SmithWaterman();
         AbstractStringMetric lev_metric = new Levenshtein();
 
@@ -34,18 +32,22 @@ public class NERWildcardMatchFeature extends AbstractEvidenceFeature {
             limit = wilcardCountList.size();
         }
 
+        boolean isSubjectWildcard = ClosestPredicate.getWildcardType(model.getPropertyUri()).equals("subject");
+
+        String wildcardPositionOriginalLabel = null;
+        if(isSubjectWildcard) {
+            wildcardPositionOriginalLabel = model.getSubjectLabel("en");
+        } else {
+            wildcardPositionOriginalLabel = model.getObjectLabel("en");
+        }
         int score = 0;
         for(int i=0; i<limit; i++) {
-            String nerTag = wilcardCountList.get(i).getKey();
-            
-            for (String objectPart : objectLabels) {
-                if(!(objectPart.isEmpty() || objectPart.isBlank()) && nerTag.contains(objectPart)) {
-                    score += (5 - i);
-                    break;
-                }
+            String wildcardWord = wilcardCountList.get(i).getKey();
+            double levSimilarity = lev_metric.getSimilarity(wildcardWord, wildcardPositionOriginalLabel);
+            if(levSimilarity > 0.5) {
+                score += levSimilarity * wilcardCountList.get(i).getValue();
             }
         }
-
         evidence.getFeatures().setValue(NAbstractEvidenceFeatures.WILDCARD_MATCH_SCORE, score);
         if(score > 0) {
             evidence.getFeatures().setValue(NAbstractEvidenceFeatures.WILDCARD_MATCH, 1);
@@ -53,17 +55,26 @@ public class NERWildcardMatchFeature extends AbstractEvidenceFeature {
             evidence.getFeatures().setValue(NAbstractEvidenceFeatures.WILDCARD_MATCH, 0);
         }
 
-        boolean isPerfectMatch = false;
+        int perfectMatchCount = 0;
 
         for (ComplexProof proof: evidence.getComplexProofs()) {
-            if(proof.getProofPhrase().contains(model.getObjectLabel("en"))) {
-                isPerfectMatch = true;
-                break;
+            NComplexProof nproof = (NComplexProof) proof;
+
+            if(nproof.getIsSubjectWildcard()) {
+                if(proof.getProofPhrase().contains(model.getSubjectLabel("en"))) {
+                    perfectMatchCount++;
+                    break;
+                }
+            } else {
+                if(proof.getProofPhrase().contains(model.getObjectLabel("en"))) {
+                    perfectMatchCount++;
+                    break;
+                }
             }
         }
 
-        if(isPerfectMatch) {
-            evidence.getFeatures().setValue(NAbstractEvidenceFeatures.WILDCARD_PERFECT_MATCH, 1);
+        if(perfectMatchCount > 0) {
+            evidence.getFeatures().setValue(NAbstractEvidenceFeatures.WILDCARD_PERFECT_MATCH, perfectMatchCount);
         } else {
             evidence.getFeatures().setValue(NAbstractEvidenceFeatures.WILDCARD_PERFECT_MATCH, 0);
         }
@@ -80,12 +91,24 @@ public class NERWildcardMatchFeature extends AbstractEvidenceFeature {
         for (ComplexProof proof: evidence.getComplexProofs()) {
             NComplexProof nproof = (NComplexProof) proof;
 
-            String matchedObject = nproof.getMatchedObject();
-            String inputObject = evidence.getModel().getObjectLabel("en");
+            if(proof.getScore() < 0.5) {
+                continue;
+            }
 
-            if(matchedObject != null) {
-                double swSimilarity = sw_metric.getSimilarity(matchedObject, inputObject);
-                double levSimilarity = lev_metric.getSimilarity(matchedObject, inputObject);
+            String matched = null;
+            String input = null;
+
+            if(isSubjectWildcard) {
+                matched = nproof.getMatchedObject();
+                input = evidence.getModel().getObjectLabel("en");
+            } else {
+                matched = nproof.getMatchedSubject();
+                input = evidence.getModel().getSubjectLabel("en");
+            }
+
+            if(matched != null) {
+                double swSimilarity = sw_metric.getSimilarity(matched, input);
+                double levSimilarity = lev_metric.getSimilarity(matched, input);
 
                 if(swSimilarity > bestSWSimilarity) {
                     bestSWSimilarity = swSimilarity;
@@ -100,12 +123,13 @@ public class NERWildcardMatchFeature extends AbstractEvidenceFeature {
                 totalNormalizedLevSimilarity += levSimilarity;
                 count++;
             }
-            
         }
-        
-        totalNormalizedSWSimilarity /= count;
-        totalNormalizedLevSimilarity /= count;
-        
+
+        if(count > 0) {
+            totalNormalizedSWSimilarity /= count;
+            totalNormalizedLevSimilarity /= count;
+        }
+
         nevidence.getFeatures().setValue(NAbstractEvidenceFeatures.WILDCARD_MATCH_BEST_LEV_SCORE, bestLevSimilarity);
         nevidence.getFeatures().setValue(NAbstractEvidenceFeatures.WILDCARD_MATCH_NORMALIZED_LEV_SCORE, totalNormalizedLevSimilarity);
 

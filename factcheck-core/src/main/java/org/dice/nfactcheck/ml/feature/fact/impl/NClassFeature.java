@@ -29,8 +29,8 @@ public class NClassFeature implements FactFeature {
         // System.out.println("Extracting class feature");
         String proofPhrase = proof.getProofPhrase();
 
-        if(model.getObjectLabel("en").length() > 3 && proofPhrase.contains(model.getObjectLabel("en"))) {
-            System.out.println("Acceptable : " + proof.getProofPhrase());
+        if(model.getObjectLabel("en").length() > 3 && proofPhrase.contains(model.getObjectLabel("en")) && proofPhrase.contains(model.getSubjectLabel("en"))) {
+            // System.out.println("Acceptable : " + proof.getProofPhrase());
             proof.getFeatures().setValue(NAbstractFactFeatures.CLASS, "acceptable");
         } else {
             String[] subjectParts = model.getSubjectLabel("en").split("[\\s*\\.,]");
@@ -40,7 +40,7 @@ public class NClassFeature implements FactFeature {
 
             for (String subjectPart : subjectParts) {
                 if(subjectPart.length() > 3 && proofPhrase.toLowerCase().contains(subjectPart.toLowerCase())) {
-                    System.out.println("Subject Lookup : " + subjectPart);
+                    // System.out.println("Subject Lookup : " + subjectPart);
                     isAcceptable = true;
                     break;
                 }
@@ -49,9 +49,9 @@ public class NClassFeature implements FactFeature {
             if(isAcceptable) {
                 isAcceptable = false;
                 for (String objectPart : objectParts) {
-                    System.out.println("Object Lookup : " + objectPart);
+                    // System.out.println("Object Lookup : " + objectPart);
                     if(!(objectPart.isEmpty() || objectPart.isBlank()) && objectPart.length() > 3 && proofPhrase.toLowerCase().contains(objectPart.toLowerCase())) {
-                        System.out.println("Acceptable");
+                        // System.out.println("Acceptable");
                         isAcceptable = true;
                         break;
                     }
@@ -59,12 +59,20 @@ public class NClassFeature implements FactFeature {
             }
 
             if(isAcceptable) {
-                System.out.println("Acceptable : " + proof.getProofPhrase());
+                // System.out.println("Acceptable : " + proof.getProofPhrase());
                 proof.getFeatures().setValue(NAbstractFactFeatures.CLASS, "acceptable");
             } else {
-                System.out.println("Unacceptable : " + proof.getProofPhrase());
+                // System.out.println("Unacceptable : " + proof.getProofPhrase());
                 proof.getFeatures().setValue(NAbstractFactFeatures.CLASS, "unacceptable");
             }
         }
+
+        NComplexProof nproof = (NComplexProof) proof;
+        if(nproof.getIsSubjectWildcard()) {
+            proof.getFeatures().setValue(NAbstractFactFeatures.IS_SUBJECT_WILDCARD, 1.0);
+        } else {
+            proof.getFeatures().setValue(NAbstractFactFeatures.IS_SUBJECT_WILDCARD, 0.0);
+        }
+
     }
 }

@@ -10,13 +10,6 @@ import org.dice.nfactcheck.ml.feature.fact.NAbstractFactFeatures;
 public class NWordnetExpansionFeature extends WordnetExpensionFeature {
     @Override
     public void extractFeature(ComplexProof proof, Evidence evidence) {
-        // if(proof.getClass() == NComplexProof.class) {
-        //     NComplexProof nProof = (NComplexProof) proof;
-
-        //     if(nProof.getProbableWildcardWords() == null 
-        //         || nProof.getProbableWildcardWords().size() == 0)
-        //         return;
-        // }
         
         double similarity = 0;
         

@@ -55,11 +55,14 @@ public class PredicateBasedProofExtractor implements FactSearcher {
 
 	@Override
 	public void generateProofs(Evidence evidence, WebSite website, DefactoModel model, Pattern pattern) {
+		// System.out.println("Generate proofs");
+		// System.out.println(website.getText());
+		// System.out.println();
 		String language = "en";
 		NEvidence nevidence = (NEvidence) evidence;
 		try
-		{
-			String targetLabel = model.getObjectLabelNoFallBack("en");
+		{			
+			model.getObjectLabelNoFallBack("en");
 			String predicateLabel = pattern.getNormalized().trim();
 
 			NMetaQuery nmq = (NMetaQuery) website.getQuery();
@@ -80,7 +83,6 @@ public class PredicateBasedProofExtractor implements FactSearcher {
 				predicateLabels.add(predicatepattern.getNormalized().trim());
 			}
 
-
 			targetLabels.remove(Constants.NO_LABEL);
 
 			List<java.util.regex.Pattern> targetPatterns = new ArrayList<java.util.regex.Pattern>();
@@ -95,6 +97,7 @@ public class PredicateBasedProofExtractor implements FactSearcher {
 
 			if(nmq.getWildcard() == "object") {
 				String subjectLabel = evidence.getModel().getSubjectLabel("en");
+				subjectLabel = subjectLabel.replaceAll("\\(.+?\\)", "").trim();
 
 				for (String label : subjectLabel.split(" ")) {
 					if(label.length()>2)
@@ -102,7 +105,7 @@ public class PredicateBasedProofExtractor implements FactSearcher {
 				}
 			} else if(nmq.getWildcard() == "subject") {
 				String objectLabel = evidence.getModel().getObjectLabel("en");
-
+				objectLabel = objectLabel.replaceAll("\\(.+?\\)", "").trim();
 				for (String label : objectLabel.split(" ")) {
 					if(label.length()>2)
 						targetLabels.add(label.trim());

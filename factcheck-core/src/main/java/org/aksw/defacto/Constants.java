@@ -90,6 +90,11 @@ public class Constants {
 				"dean", "priscilla", "bates", "alan", "prinzessin", "bayern", "österreich", "daughter");
 	}
 	
+	public static final Set<String> TEAM_SKIP_WORDS = new HashSet<String>();
+	static {
+		Collections.addAll(TEAM_SKIP_WORDS, "NBA", "NCAA");
+	}
+
 	/**
 	 * Use this property to write new lines in files or stdouts
 	 */

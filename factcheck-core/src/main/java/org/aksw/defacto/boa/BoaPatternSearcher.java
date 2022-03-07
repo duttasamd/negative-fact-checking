@@ -1,7 +1,6 @@
 package org.aksw.defacto.boa;
 
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -13,11 +12,9 @@ import java.util.Map;
 import org.aksw.defacto.Defacto;
 import org.apache.log4j.Logger;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.BinaryRequestWriter;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
-import org.apache.solr.client.solrj.impl.HttpSolrServer;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
@@ -184,25 +181,25 @@ public class BoaPatternSearcher {
     public static void main(String[] args) {
 
     	Defacto.init();
-//        queryPatterns("http://dbpedia.org/ontology/award");
-//        System.out.println("--------------");
-//        queryPatterns("http://dbpedia.org/ontology/birthPlace");
-//        System.out.println("--------------");
-//        queryPatterns("http://dbpedia.org/ontology/deathPlace");
-//        System.out.println("--------------");
-//        queryPatterns("http://dbpedia.org/ontology/foundationPlace");
+        queryPatterns("http://dbpedia.org/ontology/award");
         System.out.println("--------------");
-//        queryPatterns("http://dbpedia.org/ontology/leaderName");
+        queryPatterns("http://dbpedia.org/ontology/birthPlace");
         System.out.println("--------------");
-//        queryPatterns("http://dbpedia.org/ontology/team");
+        queryPatterns("http://dbpedia.org/ontology/deathPlace");
         System.out.println("--------------");
-//        queryPatterns("http://dbpedia.org/ontology/author");
-//        System.out.println("--------------");
+        queryPatterns("http://dbpedia.org/ontology/foundationPlace");
+        System.out.println("--------------");
+        queryPatterns("http://dbpedia.org/ontology/leaderName");
+        System.out.println("--------------");
+        queryPatterns("http://dbpedia.org/ontology/team");
+        System.out.println("--------------");
+        queryPatterns("http://dbpedia.org/ontology/author");
+        System.out.println("--------------");
         queryPatterns("http://dbpedia.org/ontology/spouse");
-//        System.out.println("--------------");
-//        queryPatterns("http://dbpedia.org/ontology/starring");
-//        System.out.println("--------------");
-//        queryPatterns("http://dbpedia.org/ontology/subsidiary");
+        System.out.println("--------------");
+        queryPatterns("http://dbpedia.org/ontology/starring");
+        System.out.println("--------------");
+        queryPatterns("http://dbpedia.org/ontology/subsidiary");
     }
 
 	/**

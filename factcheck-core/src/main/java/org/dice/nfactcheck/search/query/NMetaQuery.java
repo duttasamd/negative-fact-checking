@@ -22,6 +22,11 @@ public class NMetaQuery extends  MetaQuery {
         
         super(subjectLabel, propertyLabel, objectLabel, language, topicTerms);
         this.wildcard = wildcard;
+        if(wildcard.equals("subject")) {
+            this.subjectLabel = "";
+        } else {
+            this.objectLabel = "";
+        }
     }
     
     public NMetaQuery(String metaQuery) {

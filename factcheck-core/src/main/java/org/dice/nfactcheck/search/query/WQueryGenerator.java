@@ -25,7 +25,7 @@ public class WQueryGenerator extends QueryGenerator {
         String subjectLabel = model.getSubjectLabelNoFallBack(language);
         String objectLabel  = model.getObjectLabelNoFallBack(language);
 
-
+        String wildcardType = ClosestPredicate.getWildcardType(model.predicateUri);
         BoaPatternSearcher.init();
         ClosestPredicate.init();
 
@@ -35,7 +35,7 @@ public class WQueryGenerator extends QueryGenerator {
             for (String predicate : predicateList) {
                 Pattern pattern = new Pattern("?D? " + predicate + " ?R?", "en");
                 pattern.naturalLanguageRepresentationWithoutVariables = predicate;
-                MetaQuery metaQuery = new NMetaQuery(subjectLabel, pattern.getNormalized(), objectLabel, language, null, "object");
+                MetaQuery metaQuery = new NMetaQuery(subjectLabel, pattern.getNormalized(), objectLabel, language, null, wildcardType);
                 queryStrings.put(pattern, metaQuery);
             }
         }

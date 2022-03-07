@@ -5,6 +5,8 @@ import java.util.Properties;
 import org.aksw.defacto.Defacto;
 import org.dice.factcheck.nlp.stanford.CoreNLPClient;
 
+import edu.stanford.nlp.ie.crf.CRFClassifier;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLPClient;
 
@@ -57,6 +59,18 @@ public class CoreNLPServerClient implements CoreNLPClient {
 		this.pipelineCoref.annotate(annotatedDoc);
 		return annotatedDoc;
 
+	}
+
+	@Override
+	public Annotation openIEAnnotation(String document) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public CRFClassifier<CoreLabel> getNERClassifier() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

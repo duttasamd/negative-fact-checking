@@ -36,29 +36,33 @@ public class NPageTitleFeature implements FactFeature {
         Set<String> objectLabels  = null;
         
         if(nProof.getIsSubjectWildcard()) {
-            subjectLabels = new HashSet<>(nProof.getProbableWildcardWords());
+            subjectLabels = new HashSet<>();
+            subjectLabels.add(nProof.getMatchedSubject());
             objectLabels = proof.getModel().getObjectLabels();
             objectLabels.addAll(proof.getModel().getObjectAltLabels());
         } else {
-            objectLabels = new HashSet<>(nProof.getProbableWildcardWords());
+            objectLabels = new HashSet<>();
+            objectLabels.add(nProof.getMatchedObject());
             subjectLabels = proof.getModel().getSubjectLabels();
             subjectLabels.addAll(proof.getModel().getSubjectAltLabels());
         }
 
         String pageTitle = proof.getWebSite().getTitle();
-        
         float subjectSimilarity = 0f;
-        for ( String label : subjectLabels) {
-        	
-        	float sim = metric.getSimilarity(pageTitle, label);
-        	if ( sim >= subjectSimilarity ) subjectSimilarity = sim; 
-        }
         float objectSimilarity = 0f;
-        for ( String label : objectLabels) {
-        	
-        	float sim = metric.getSimilarity(pageTitle, label);
-        	if ( sim >= objectSimilarity ) objectSimilarity = sim; 
+        
+        for ( String label : subjectLabels) {
+            float sim = metric.getSimilarity(pageTitle, label);
+            if ( sim >= subjectSimilarity ) subjectSimilarity = sim; 
         }
+        
+        for ( String label : objectLabels) {
+            float sim = metric.getSimilarity(pageTitle, label);
+            if ( sim >= objectSimilarity ) objectSimilarity = sim; 
+        }
+
+        // System.out.println("titlesubject : " + Double.toString(subjectSimilarity));
+        // System.out.println("titleobject : " + Double.toString(objectSimilarity));
         
         proof.getFeatures().setValue(NAbstractFactFeatures.PAGE_TITLE_SUBJECT, subjectSimilarity);
         proof.getFeatures().setValue(NAbstractFactFeatures.PAGE_TITLE_OBJECT, objectSimilarity);

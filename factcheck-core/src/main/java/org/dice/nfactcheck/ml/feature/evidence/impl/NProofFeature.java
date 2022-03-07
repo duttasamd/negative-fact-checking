@@ -26,27 +26,24 @@ public class NProofFeature extends AbstractEvidenceFeature {
     public void extractFeature(Evidence evidence) {
         NEvidence nevidence = (NEvidence) evidence;
         // how many boa pattern did we find
-        evidence.getFeatures().setValue(AbstractEvidenceFeature.NUMBER_OF_PROOFS, evidence.getComplexProofs().size());
+        evidence.getFeatures().setValue(NAbstractEvidenceFeatures.NUMBER_OF_PROOFS, evidence.getComplexProofs().size());
         
         double scorePositives = 1D;
-        double scoreNegatives = 1D;
         
         // on how many sites did we find a boa pattern
         Set<String> proofWebsites = new HashSet<String>();
         for ( ComplexProof p : evidence.getComplexProofs() ) {
-            
             if ( p.getScore() >= Defacto.DEFACTO_CONFIG.getDoubleSetting("evidence", "CONFIRMATION_THRESHOLD") ) {
-                
                 proofWebsites.add(p.getWebSite().getUrl());
                 scorePositives *= ( 1D - p.getScore() ); 
             }
-            else {
-                
-                scoreNegatives *= ( 1D - p.getScore());
-            }
         }
-        nevidence.getFeatures().setValue(NAbstractEvidenceFeatures.NUMBER_OF_CONFIRMING_PROOFS, proofWebsites.size());
-        nevidence.getFeatures().setValue(NAbstractEvidenceFeatures.TOTAL_POSITIVES_EVIDENCE_SCORE, 1D - scorePositives);
-        nevidence.getFeatures().setValue(NAbstractEvidenceFeatures.TOTAL_NEGATIVES_EVIDENCE_SCORE, 1D - scoreNegatives);
+
+        nevidence.getFeatures().setValue(NAbstractEvidenceFeatures.NUMBER_OF_ACCEPTABLE_PROOFS, proofWebsites.size());
+        nevidence.getFeatures().setValue(NAbstractEvidenceFeatures.TOTAL_ACCEPTABLE_PROOFS_SCORE, 1D - scorePositives);
+
+        // System.out.println("Num proofs : " + Integer.toString(evidence.getComplexProofs().size()));
+        // System.out.println("Num acceptable proofs : " + Integer.toString(proofWebsites.size()));
+        // System.out.println("Acceptable proofs score : " + Double.toString(scorePositives));
     }
 }

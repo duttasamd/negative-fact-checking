@@ -23,6 +23,7 @@ import org.aksw.defacto.search.query.MetaQuery;
 import org.aksw.defacto.search.result.SearchResult;
 import org.dice.factcheck.topicterms.Word;
 import org.dice.nfactcheck.evidence.NEvidence;
+import org.dice.nfactcheck.patterns.ClosestPredicate;
 import org.dice.nfactcheck.proof.extract.PredicateBasedProofExtractor;
 import org.dice.nfactcheck.search.concurrent.NWebSiteScoreCallable;
 import org.dice.nfactcheck.search.query.NMetaQuery;
@@ -102,7 +103,6 @@ public class NEvidenceCrawler extends EvidenceCrawler {
     		for ( Future<WebSite> result : executor.invokeAll(scoreCallables)) {
     			results.add(result.get());
             }
-            System.out.println("Exact matches count : " + Integer.toString(PredicateBasedProofExtractor.exactMatchesCount));
         }   
         catch (InterruptedException e) {
 
@@ -146,8 +146,9 @@ public class NEvidenceCrawler extends EvidenceCrawler {
             Long totalHitCount = 0L; // sum over the n*m query results        
             for ( SearchResult result : searchResults ) {
             	totalHitCount += result.getTotalHitCount();  
+                // System.out.println(result.getWebSites().size());
             }
-            System.out.println("Total hit count : " + totalHitCount);
+            // System.out.println("Total hit count : " + totalHitCount);
                     
             evidence = new NEvidence(model, totalHitCount, patternToQueries.keySet());
     	    scoreSearchResults(searchResults, model, evidence);
@@ -161,29 +162,32 @@ public class NEvidenceCrawler extends EvidenceCrawler {
     	evidence = evidenceCache.get(model);
     	
         for ( String language : model.getLanguages() ) {
-        		
-            String subjectLabel = evidence.getModel().getSubjectLabel(language);
-            String objectLabel = evidence.getModel().getObjectLabel(language);
-            
-            if ( !subjectLabel.equals(Constants.NO_LABEL) && !objectLabel.equals(Constants.NO_LABEL) ) {
+            List<Word> topicTerms = new ArrayList<Word>();
+                
+            if(topicTerms.isEmpty())
+            {
+                String wildcard = ClosestPredicate.getWildcardType(evidence.getModel().getPropertyUri());
+                Word topicTerm = null;
 
-                List<Word> topicTerms = new ArrayList<Word>();
-                List<Word> topicTermsObject = new ArrayList<Word>();
-                topicTerms.addAll(topicTermsObject);
-                if(topicTerms.isEmpty())
-                {
-                    Word subject = new Word(subjectLabel, 0);
-                    Word object = new Word(objectLabel, 0);
-                    topicTerms.add(subject);
-                    topicTerms.add(object);
-                    List<Pattern> patterns = searcher.querySolrIndex(evidence.getModel().getPropertyUri(), 20, 0, language);
+                if(wildcard.equals("subject")) {
+                    String objectLabel = evidence.getModel().getObjectLabel(language);
+                    topicTerm = new Word(objectLabel, 0);
+                } else {
+                    String subjectLabel = evidence.getModel().getSubjectLabel(language);
+                    topicTerm = new Word(subjectLabel, 0);
+                }
+                
+                if(!topicTerm.getWord().equals(Constants.NO_LABEL)) {
+                    topicTerms.add(topicTerm);
+
+                    List<Pattern> patterns = evidence.getEnBoaPatterns();
                     for ( Pattern p : patterns ) {
                         Word predicate = new Word(p.getNormalized().trim(), 0);
                         topicTerms.add(predicate);
                     }
+                    evidence.setTopicTerms(language, topicTerms);
+                    evidence.setTopicTermVectorForWebsites(language);
                 }
-                evidence.setTopicTerms(language, topicTerms);
-                evidence.setTopicTermVectorForWebsites(language);
             }
         }
         evidence.calculateSimilarityMatrix();

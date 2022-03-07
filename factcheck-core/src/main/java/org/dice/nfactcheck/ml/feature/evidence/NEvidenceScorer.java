@@ -4,6 +4,7 @@ import org.aksw.defacto.config.DefactoConfig;
 import org.aksw.defacto.evidence.Evidence;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.functions.SMO;
 import weka.classifiers.trees.J48;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -28,12 +29,18 @@ public class NEvidenceScorer {
     }
 
     private Classifier loadClassifier() {
-        Classifier j48 = null;
+        // Classifier j48 = null;
+        Classifier smo = null;
         try {
-            j48 = new J48();
-            trainingInstances.deleteStringAttributes();
-            j48.buildClassifier(trainingInstances);
-            return j48;
+            // j48 = new J48();
+            // trainingInstances.deleteStringAttributes();
+            // j48.buildClassifier(trainingInstances);
+            smo = new SMO();
+            trainingInstances.setClassIndex(trainingInstances.numAttributes() - 1);
+            ((SMO) smo).setBuildLogisticModels(true);
+            smo.buildClassifier(trainingInstances);
+
+            return smo;
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -47,13 +54,9 @@ public class NEvidenceScorer {
             trainingInstances.deleteStringAttributes();
 
             Instance newInstance = new Instance(evidence.getFeatures());
-            System.out.println(newInstance.toString());
-            newInstance.deleteAttributeAt(1);
+            // System.out.println(newInstance.toString());
+            // newInstance.deleteAttributeAt(1);
             newInstance.setDataset(trainingInstances);
-
-            // this gives us the probability distribution for an input triple
-            // [0.33, 0.66] means it's 33% likely to be true and 66% likely to be false
-            // we are only interested in the true value
             evidence.setDeFactoScore(this.classifier.distributionForInstance(newInstance)[0]);
         }
         catch (Exception e) {

@@ -19,11 +19,6 @@ public class NTopicCoverageFeature extends AbstractEvidenceFeature {
     @Override
     public void extractFeature(Evidence evidence) {
         NEvidence nevidence = (NEvidence) evidence;
-        int totalNumberOfConfirmingWebSites = 0;
-        int totalNumberOfNonConfirmingWebSites = 0;
-        float totalTopicCoverageConfirming = 0;
-        float totalTopicCoverageNonConfirming = 0;
-        
         double sumScore = 0D;
         double maxScore = 0D;
         
@@ -38,32 +33,12 @@ public class NTopicCoverageFeature extends AbstractEvidenceFeature {
                 
                 maxScore = Math.max(maxScore, website.getTopicCoverageScore());
                 sumScore += website.getTopicCoverageScore();
-                
-                
-//                if ( website.getScore() > Constants.CONFIRMATION_THRESHOLD ) {
-//                    
-//                    totalTopicCoverageConfirming += (float) topicTermsInWebSite.size() / (float) evidence.getTopicTerms().size();
-//                    totalNumberOfConfirmingWebSites++;
-//                }
-//                else {
-//
-//                    totalTopicCoverageNonConfirming += (float) topicTermsInWebSite.size() / (float) evidence.getTopicTerms().size();
-//                    totalNumberOfNonConfirmingWebSites++;
-//                }
             }
         }
         
         nevidence.getFeatures().setValue(NAbstractEvidenceFeatures.TOPIC_COVERAGE_MAX, maxScore);
         nevidence.getFeatures().setValue(NAbstractEvidenceFeatures.TOPIC_COVERAGE_SUM, sumScore);
-        
-//        // average the topic coverage of confirming pages
-//        Double topicCoverageAverageConfirming = (double) totalTopicCoverageConfirming / (double) totalNumberOfConfirmingWebSites;
-//        evidence.getFeatures().setValue(AbstractFeature.TOPIC_COVERAGE_CONFIRMING_FEATURE, 
-//                !topicCoverageAverageConfirming.isNaN() && !topicCoverageAverageConfirming.isInfinite() ? topicCoverageAverageConfirming : 0D);
-//        
-//        // average the topic coverage of non confirming pages
-//        Double topicCoverageAverageNonConfirming = (double) totalTopicCoverageNonConfirming / (double) totalNumberOfNonConfirmingWebSites;
-//        evidence.getFeatures().setValue(AbstractFeature.TOPIC_COVERAGE_NON_CONFIRMING_FEATURE, 
-//                !topicCoverageAverageNonConfirming.isNaN() && !topicCoverageAverageNonConfirming.isInfinite() ? topicCoverageAverageNonConfirming : 0D);
+     
+        // System.out.println("Topic coverage : " + Double.toString(maxScore) + " <===> " + Double.toString(sumScore));
     }
 }

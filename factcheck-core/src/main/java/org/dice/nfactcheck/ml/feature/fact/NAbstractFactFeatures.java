@@ -23,18 +23,18 @@ public class NAbstractFactFeatures {
     public static final Attribute END_OF_SENTENCE_EXCLAMATION_MARK  		= new Attribute("end_of_sentence_exclamation_mark");
     public static final Attribute NUMBER_OF_NON_ALPHA_NUMERIC_CHARACTERS 	= new Attribute("number_of_non_alpha_numeric_characters");
 
-    public static final Attribute DEPENDENCY_SUBJECT_PREDICATE			    = new Attribute("dependency_subject_predicate");
+    public static final Attribute IS_SUBJECT_WILDCARD                       = new Attribute("is_subject_wildcard");
+
+    // public static final Attribute DEPENDENCY_SUBJECT_PREDICATE			    = new Attribute("dependency_subject_predicate");
     public static final Attribute DEPENDENCY_SUBJECT_PREDICATE_LEVEL_DISTANCE 
                                                                             = new Attribute("dependency_subject_predicate_level_distance");
     public static final Attribute DEPENDENCY_SUBJECT_PREDICATE_INDEX_DISTANCE 
                                                                             = new Attribute("dependency_subject_predicate_index_distance");                                        
-    public static final Attribute DEPENDENCY_PREDICATE_OBJECT			    = new Attribute("dependency_predicate_object");
+    // public static final Attribute DEPENDENCY_PREDICATE_OBJECT			    = new Attribute("dependency_predicate_object");
     public static final Attribute DEPENDENCY_PREDICATE_OBJECT_LEVEL_DISTANCE 
                                                                             = new Attribute("dependency_predicate_object_level_distance");
     public static final Attribute DEPENDENCY_PREDICATE_OBJECT_INDEX_DISTANCE 
                                                                             = new Attribute("dependency_predicate_object_index_distance");
-
-    public static final Attribute DEPENDENCY_SUBJECT_PREDICATE_OBJECT		= new Attribute("dependency_subject_predicate_object");
 
     public static final Attribute NER_MATCH					                = new Attribute("ner_match");
     public static final Attribute NER_NOT_LIST					            = new Attribute("ner_not_list");
@@ -43,8 +43,7 @@ public class NAbstractFactFeatures {
     public static final Attribute WILDCARD_SCORE					        = new Attribute("wildcard_score");
     public static final Attribute WILDCARD_COUNT					        = new Attribute("wildcard_count");
 
-	public static final Attribute QUERY_SUBOROBJ_SIMILARITY 				    = new Attribute("query_suborobj_similarity");
-	// public static final Attribute OBJECT_SIMILARITY 						= new Attribute("object_similarity");
+	public static final Attribute QUERY_SUBOROBJ_SIMILARITY 				= new Attribute("query_suborobj_similarity");
 
     public static Attribute LANGUAGE                   						= new Attribute("language");
     public static Attribute PROPERTY_NAME                     				= new Attribute("property_name");
@@ -52,7 +51,6 @@ public class NAbstractFactFeatures {
     
     static {        
         attributes.addElement(QUERY_SUBOROBJ_SIMILARITY);
-        // attributes.addElement(SUBJECT_SIMILARITY);
 
         attributes.addElement(COMMA_COUNT);
     	attributes.addElement(DIGIT_COUNT);
@@ -72,15 +70,15 @@ public class NAbstractFactFeatures {
         attributes.addElement(TOTAL_OCCURRENCE);
         attributes.addElement(WORDNET_EXPANSION);
 
+        attributes.addElement(IS_SUBJECT_WILDCARD);
 
-        attributes.addElement(DEPENDENCY_SUBJECT_PREDICATE);
+        // attributes.addElement(DEPENDENCY_SUBJECT_PREDICATE);
         attributes.addElement(DEPENDENCY_SUBJECT_PREDICATE_LEVEL_DISTANCE);
         attributes.addElement(DEPENDENCY_SUBJECT_PREDICATE_INDEX_DISTANCE);
 
-        attributes.addElement(DEPENDENCY_PREDICATE_OBJECT);
+        // attributes.addElement(DEPENDENCY_PREDICATE_OBJECT);
         attributes.addElement(DEPENDENCY_PREDICATE_OBJECT_LEVEL_DISTANCE);
         attributes.addElement(DEPENDENCY_PREDICATE_OBJECT_INDEX_DISTANCE);
-        attributes.addElement(DEPENDENCY_SUBJECT_PREDICATE_OBJECT);
 
         attributes.addElement(NER_MATCH);
         attributes.addElement(NER_NOT_LIST);

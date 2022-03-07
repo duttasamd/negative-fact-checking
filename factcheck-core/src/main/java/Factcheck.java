@@ -29,10 +29,10 @@ public class Factcheck {
         FactScorer factScorer = new FactScorer();
 		factScorer.scoreEvidence(evidence);
 
-        NEvidenceFeatureExtractor featureCalculator = new NEvidenceFeatureExtractor();
+        EvidenceFeatureExtractor featureCalculator = new EvidenceFeatureExtractor();
 		featureCalculator.extractFeatureForEvidence(evidence);
 
-        NEvidenceScorer evidenceScorer = new NEvidenceScorer();
+        EvidenceScorer evidenceScorer = new EvidenceScorer();
 		evidenceScorer.scoreEvidence(evidence);
 
         return evidence.getDeFactoScore();

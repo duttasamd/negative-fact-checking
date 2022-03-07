@@ -21,13 +21,6 @@ public class NTotalOccurrenceFeature implements FactFeature {
      */
     @Override
     public void extractFeature(ComplexProof proof, Evidence evidence) {
-        // if(proof.getClass() == NComplexProof.class) {
-        //     NComplexProof nProof = (NComplexProof) proof;
-
-        //     if(nProof.getProbableWildcardWords() == null 
-        //         || nProof.getProbableWildcardWords().size() == 0)
-        //         return;
-        // }
         int numberOfOccurrences = 0;
         
         for ( ComplexProof complexProof : evidence.getComplexProofs())

@@ -44,7 +44,7 @@ public class NFactScorer {
     public void scoreEvidence(Evidence evidence) {
 
     	Instances instancesWithStringVector = new Instances(trainingInstances);
-        instancesWithStringVector.setClassIndex(26);
+        instancesWithStringVector.setClassIndex(trainingInstances.numAttributes() - 1);
     	
         for ( ComplexProof proof : evidence.getComplexProofs() ) {
         	

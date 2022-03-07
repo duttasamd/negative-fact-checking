@@ -22,14 +22,6 @@ public class NEndOfSentenceCharacterFeature implements FactFeature {
      */
     @Override
     public void extractFeature(ComplexProof proof, Evidence evidence) {
-        // if(proof.getClass() == NComplexProof.class) {
-        //     NComplexProof nProof = (NComplexProof) proof;
-
-        //     if(nProof.getProbableWildcardWords() == null 
-        //         || nProof.getProbableWildcardWords().size() == 0)
-        //         return;
-        // }
-
         proof.getFeatures().setValue(NAbstractFactFeatures.END_OF_SENTENCE_DOT, StringUtils.countMatches(proof.getProofPhrase(), ".") );
         proof.getFeatures().setValue(NAbstractFactFeatures.END_OF_SENTENCE_EXCLAMATION_MARK, StringUtils.countMatches(proof.getProofPhrase(), "!"));
         proof.getFeatures().setValue(NAbstractFactFeatures.END_OF_SENTENCE_QUESTION_MARK, StringUtils.countMatches(proof.getProofPhrase(), "?"));

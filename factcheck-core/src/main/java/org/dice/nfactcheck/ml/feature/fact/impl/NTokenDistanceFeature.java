@@ -22,14 +22,6 @@ public class NTokenDistanceFeature implements FactFeature {
      */
     @Override
     public void extractFeature(ComplexProof complexProof, Evidence evidence) {
-
-		// if(complexProof.getClass() == NComplexProof.class) {
-        //     NComplexProof nProof = (NComplexProof) complexProof;
-
-        //     if(nProof.getProbableWildcardWords() == null 
-        //         || nProof.getProbableWildcardWords().size() == 0)
-        //         return;
-        // }
         complexProof.getFeatures().setValue(NAbstractFactFeatures.TOKEN_DISTANCE, complexProof.getProofPhrase().split(" ").length);
         
         String normalCaseProof = complexProof.getProofPhrase();

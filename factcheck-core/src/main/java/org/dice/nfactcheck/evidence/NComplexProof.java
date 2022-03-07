@@ -1,18 +1,48 @@
 package org.dice.nfactcheck.evidence;
 
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.aksw.defacto.evidence.ComplexProof;
 import org.aksw.defacto.evidence.WebSite;
 import org.aksw.defacto.model.DefactoModel;
 import org.dice.nfactcheck.ml.feature.fact.NAbstractFactFeatures;
 
+import edu.stanford.nlp.ling.CoreLabel;
 import weka.core.Instance;
 
 public class NComplexProof extends ComplexProof {
 
     protected boolean isTargetFullMatch;
-    protected List<String> probableWildcardWords;
+    protected List<Entry<String,Integer>> probableWildcardWords;
+    protected List<Entry<String, Integer>>  indexedSubjectList;
+    protected List<Entry<String, Integer>>  indexedObjectList;
+    protected List<List<CoreLabel>> nerResolvedProofPhrase;
+
+    public List<List<CoreLabel>> getNerResolvedProofPhrase() {
+        return nerResolvedProofPhrase;
+    }
+
+    public void setNerResolvedProofPhrase(List<List<CoreLabel>> nerResolvedProofPhrase) {
+        this.nerResolvedProofPhrase = nerResolvedProofPhrase;
+    }
+
+    public List<Entry<String, Integer>> getIndexedSubjectList() {
+        return indexedSubjectList;
+    }
+
+    public void setIndexedSubjectList(List<Entry<String, Integer>> indexedSubjectList) {
+        this.indexedSubjectList = indexedSubjectList;
+    }
+
+    public List<Entry<String, Integer>> getIndexedObjectList() {
+        return indexedObjectList;
+    }
+
+    public void setIndexedObjectList(List<Entry<String, Integer>> indexedObjectList) {
+        this.indexedObjectList = indexedObjectList;
+    }
+
     protected String mostProbableWildcard = null;
     protected double mostProbableWildcardScore = 0.0;
 
@@ -140,11 +170,11 @@ public class NComplexProof extends ComplexProof {
     protected boolean isToRemove = false;
     protected boolean isSubjectWildcard = false;
 
-    public List<String> getProbableWildcardWords() {
+    public List<Entry<String,Integer>> getProbableWildcardWords() {
         return probableWildcardWords;
     }
 
-    public void setProbableWildcardWords(List<String> probableWildcardWords) {
+    public void setProbableWildcardWords(List<Entry<String, Integer>> probableWildcardWords) {
         this.probableWildcardWords = probableWildcardWords;
     }
 

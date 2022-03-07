@@ -27,9 +27,6 @@ public class NTopicMajoritySearchFeature extends AbstractEvidenceFeature {
         NEvidence nevidence = (NEvidence) evidence;
         List<WebSite> allWebsites = new ArrayList<WebSite>();
         for ( List<WebSite> entry : evidence.getWebSites().values() ) allWebsites.addAll(entry);
-        
-//        int numberOfConfirmingWebSites = 0;
-//        int numberOfNonConfirmingWebSites = 0;
 
         double sumScore = 0D;
         double maxScore = 0D;
@@ -49,25 +46,13 @@ public class NTopicMajoritySearchFeature extends AbstractEvidenceFeature {
                     maxScore = Math.max(maxScore, site.getTopicMajoritySearchFeature());
                     sumScore += site.getTopicMajoritySearchFeature();
                     
-//                    if ( site.getScore() > Constants.CONFIRMATION_THRESHOLD ) 
-//                        numberOfConfirmingWebSites++;
-//                    else 
-//                        numberOfNonConfirmingWebSites++;
                 }
             }
         }
         
         nevidence.getFeatures().setValue(NAbstractEvidenceFeatures.TOPIC_MAJORITY_SEARCH_RESULT_SUM, sumScore);
         nevidence.getFeatures().setValue(NAbstractEvidenceFeatures.TOPIC_MAJORITY_SEARCH_RESULT_MAX, maxScore);
-        
-//        // average the topic majority search of confirming pages
-//        Double similarWebSitesAverageConfirming = (double) numberOfConfirmingWebSites / (double) allWebsites.size();
-//        evidence.getFeatures().setValue(AbstractFeature.TOPIC_MAJORITY_SEARCH_CONFIRMING_FEATURE, 
-//                !similarWebSitesAverageConfirming.isNaN() && !similarWebSitesAverageConfirming.isInfinite() ? similarWebSitesAverageConfirming : 0D);
-//        
-//        // average the topic majority search of non confirming pages
-//        Double similarWebSitesAverageNonConfirming = (double) numberOfNonConfirmingWebSites / (double) allWebsites.size();
-//        evidence.getFeatures().setValue(AbstractFeature.TOPIC_MAJORITY_SEARCH_NON_CONFIRMING_FEATURE, 
-//                !similarWebSitesAverageNonConfirming.isNaN() && !similarWebSitesAverageNonConfirming.isInfinite() ? similarWebSitesAverageNonConfirming : 0D);
+     
+        // System.out.println("Topic majority search : " + Double.toString(maxScore) + " <===> " + Double.toString(sumScore));
     }
 }

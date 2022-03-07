@@ -15,6 +15,24 @@ import weka.core.Instance;
 public class NEvidence extends Evidence {
     // protected HashSet<NComplexProof> complexProofs;
     protected List<Entry<String, Integer>> wilcardCountList;
+    protected double factcheckScore;
+    protected double nfactcheckScore;
+
+    public double getFactcheckScore() {
+        return factcheckScore;
+    }
+
+    public void setFactcheckScore(double factcheckScore) {
+        this.factcheckScore = factcheckScore;
+    }
+
+    public double getNfactcheckScore() {
+        return nfactcheckScore;
+    }
+
+    public void setNfactcheckScore(double nfactcheckScore) {
+        this.nfactcheckScore = nfactcheckScore;
+    }
 
     public NEvidence(DefactoModel model) {
         super(model);

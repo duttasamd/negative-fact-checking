@@ -3,6 +3,7 @@ package org.dice.nfactcheck.search.engine.elastic;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -42,6 +43,12 @@ public class NElasticSearchEngine extends ElasticSearchEngine {
 
             String object   = query.getObjectLabel().replace("&", "and");
 
+            if((subject.contains("(") && subject.contains(")"))
+                || (object.contains("(") && object.contains(")"))) {
+                subject = subject.replaceAll("\\(.*?\\)","").trim();
+                object = object.replaceAll("\\(.*?\\)","").trim();
+            }
+
             NMetaQuery nmq = (NMetaQuery) query;
 
             String q1 = "\""+subject+" "+property+" "+object+"\"";
@@ -52,11 +59,13 @@ public class NElasticSearchEngine extends ElasticSearchEngine {
                 q1 = "\"" + property + " " + object + "\"";
             }            
 
+            System.out.println(q1 + " size should be 100");
 
             String jsquery = "{\n" +
-            "	\"size\" : 500 ,\n" +
+            "   \"from\" : 0,\n" +
+            "	\"size\" : 100 ,\n" +
             "    \"query\" : {\n" +
-            "       \"match_phrase_prefix\" : {\n"+
+            "       \"match_phrase\" : {\n"+
             "           \"Article\" : { \n" +
             "               \"query\" : "+q1+",\n" +
             "               \"slop\" : 10\n" +
@@ -71,7 +80,7 @@ public class NElasticSearchEngine extends ElasticSearchEngine {
 
 
             String index = Defacto.DEFACTO_CONFIG.getStringSetting("elastic", "INDEX");
-            Response response = restClientobj.performRequest("GET", "/" + index + "/_search",Collections.singletonMap("pretty", "true"),entity1);
+            Response response = restClientobj.performRequest("POST", "/" + index + "/_search?size=100",Collections.singletonMap("pretty", "true"),entity1);
 
 
             String json = EntityUtils.toString(response.getEntity());
@@ -81,49 +90,40 @@ public class NElasticSearchEngine extends ElasticSearchEngine {
             JsonNode hitCount = hits.get("total");
             int docCount = Integer.parseInt(hitCount.asText());
 
-            // logger.info("docCount : " + docCount);
-
-            // System.out.println(q1 + " : " + docCount);
-
-            // int searchLimit = limitFactor;
-
-            // if(docCount > 100 && docCount <= 1000) {
-            //     searchLimit = searchLimit + (docCount/100) * 10;
-            // } else if(docCount > 1000 && docCount <= 10000) {
-            //     searchLimit += 100;
-            //     searchLimit = searchLimit + ((docCount-1000)/100) * 5;
-            // } else if(docCount > 10000) {
-            //     searchLimit += 300;
-            // }
-
-            // logger.info("Search limit : " + searchLimit);
-            // int number_of_search_results = searchLimit;
-            // if(!(docCount<number_of_search_results))
-            //     docCount = number_of_search_results;
-            //System.out.println(docCount);
+            System.out.println("NElastic Doc Count : " + Integer.toString(docCount));
             
             for(int i=0; i<docCount; i++)
             {
-                JsonNode document = hits.get("hits").get(i).get("_source");
+                JsonNode document = hits.get("hits");
+
+                if(document == null) {
+                    document = hits.get(i).get("_source");
+                } else {
+                    document = hits.get("hits").get(i).get("_source");
+                }
+
                 JsonNode articleNode = document.get("Article");
                 JsonNode articleURLNode = document.get("URL");
                 JsonNode articleTitleNode = document.get("Title");
                 JsonNode pagerank = document.get("Pagerank");
-                String articleText = articleNode.asText();
-                String articleURL = articleURLNode.asText();
-                String articleTitle = articleTitleNode.asText();
-                WebSite website = new WebSite(query, articleURL);
-                website.setTitle(articleTitle);
-                website.setText(articleText);
-                website.setRank(Float.parseFloat(pagerank.asText()));
-                website.setLanguage(query.getLanguage());
-                website.setPredicate(property);
-                results.add(website);
+
+                if(articleNode != null && articleURLNode != null && articleTitleNode != null && pagerank != null) {
+                    String articleText = articleNode.asText();
+                    String articleURL = articleURLNode.asText();
+                    String articleTitle = articleTitleNode.asText();
+                    WebSite website = new WebSite(query, articleURL);
+                    website.setTitle(articleTitle);
+                    website.setText(articleText);
+                    website.setRank(Float.parseFloat(pagerank.asText()));
+                    website.setLanguage(query.getLanguage());
+                    website.setPredicate(property);
+                    results.add(website);
+                }
             }
             return new DefaultSearchResult(results, new Long(docCount), query, pattern, false);
         }
         catch (Exception e) {
-//            e.printStackTrace();
+        //    e.printStackTrace();
             logger.info("Issue with the running Elastic search instance. Please check if the instance is running! "+e.getMessage());
             return new DefaultSearchResult(new ArrayList<WebSite>(), 0L, query, pattern, false);
         }

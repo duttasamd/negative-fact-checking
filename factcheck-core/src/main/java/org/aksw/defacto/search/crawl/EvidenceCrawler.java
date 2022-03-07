@@ -31,17 +31,12 @@ import org.aksw.defacto.search.concurrent.RegexParseCallable;
 import org.aksw.defacto.search.concurrent.WebSiteScoreCallable;
 import org.aksw.defacto.search.query.MetaQuery;
 import org.aksw.defacto.search.result.SearchResult;
-import org.aksw.defacto.topic.TopicTermExtractor;
 import org.dice.factcheck.topicterms.Word;
 import org.aksw.defacto.util.Frequency;
 import org.aksw.defacto.util.TimeUtil;
 import org.apache.commons.lang3.StringUtils;
-import org.dice.factcheck.topicterms.TopicTermsCoherence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import edu.stanford.nlp.pipeline.StanfordCoreNLP;
-import edu.stanford.nlp.pipeline.StanfordCoreNLPClient;
 
 
 /**
